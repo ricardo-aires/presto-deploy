@@ -1,0 +1,8 @@
+---
+- hosts: all
+  become: true
+
+  tasks:
+    - name: apply discovery-server role
+      include_role:
+        name: discovery-server

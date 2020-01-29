@@ -1,0 +1,117 @@
+---
+# tasks file for presto-coordinator
+- name: ensure dependencies are installed
+  package:
+    name: "{{ presto_dependecies }}"
+    state: present
+
+- name: ensure group presto exists
+  group:
+    name: "{{ presto_user.username }}"
+    gid: "{{ presto_user.gid }}"
+    state: present
+
+- name: ensure user presto exists
+  user:
+    name: "{{ presto_user.username }}"
+    group: "{{ presto_user.group }}"
+    uid: "{{ presto_user.uid }}"
+    comment: "{{ presto_user.comment }}"
+    state: present
+
+- name: ensure necessary directories exists
+  file:
+    path: "{{ item }}"
+    owner: "{{ presto_user.username }}"
+    group: "{{ presto_user.group }}"
+    mode: '0775'
+    state: directory
+  loop:
+    - "{{ presto_home_dir }}"
+    - "{{ presto_conf_dir }}"
+    - "{{ presto_data_dir }}"
+
+- name: ensure latest tarball is fetch
+  get_url:
+    url: "{{ presto_server_tarball_url }}"
+    dest: "/opt/{{ presto_server_tarball }}"
+    owner: "{{ presto_user.username }}"
+    group: "{{ presto_user.group }}"
+    mode: '0440'
+    checksum: "{{ presto_server_tarball_url_checksum }}"
+
+- name: extract tarball
+  unarchive:
+    src: "/opt/{{ presto_server_tarball }}"
+    dest: /opt
+    owner: "{{ presto_user.username }}"
+    group: "{{ presto_user.group }}"
+    remote_src: yes
+  notify: restart presto-coordinator service
+
+- name: fix permissions after extract
+  file:
+    path: "{{ presto_home_dir }}"
+    owner: "{{ presto_user.username }}"
+    group: "{{ presto_user.group }}"
+    recurse: yes
+
+- name: setup catalog connectors
+  copy:
+    src: catalog/
+    dest: "{{ presto_conf_dir }}/catalog/"
+    owner: "{{ presto_user.username }}"
+    group: "{{ presto_user.group }}"
+    mode: '0644'
+    directory_mode: '0755'
+  notify: restart presto-coordinator service
+
+- name: ensure setup files are in-place
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ presto_conf_dir }}/{{ item }}"
+    owner: "{{ presto_user.username }}"
+    group: "{{ presto_user.group }}"
+    mode: '0640'
+  loop:
+    - node.properties
+    - jvm.config
+    - config.properties
+    - log.properties
+  notify: restart presto-coordinator service
+
+- name: setup systemctl presto-coordinator service
+  template:
+    src: presto-coordinator.service.j2
+    dest: /etc/systemd/system/presto-coordinator.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart presto-coordinator service
+
+- name: Force all notified handlers to run at this point
+  meta: flush_handlers
+
+- name: ensure presto-coordinator service is enabled and started
+  service:
+    name: presto-coordinator
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+- name: get presto cli
+  get_url:
+    url: "{{ presto_cli_jar_url }}"
+    dest: "{{ presto_home_dir }}/bin/presto-cli"
+    owner: presto
+    group: presto
+    mode: '0555'
+    checksum: "{{ presto_cli_jar_checksum }}"
+
+- name: Create a symbolic link to presto cli
+  file:
+    src: "{{ presto_home_dir }}/bin/presto-cli"
+    dest: /usr/local/sbin/presto-cli
+    owner: presto
+    group: presto
+    state: link

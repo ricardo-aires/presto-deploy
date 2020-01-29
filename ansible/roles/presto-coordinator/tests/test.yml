@@ -1,0 +1,16 @@
+---
+- hosts: all
+  vars:
+    discovery_server_ip: "{{ hostvars['discovery']['ansible_eth1']['ipv4']['address'] }}"
+    discovery_server_port: 8411
+  become: true
+
+  tasks:
+    - name: apply discovery-server role
+      include_role:
+        name: discovery-server
+      when: "'discovery_server' in group_names"
+    - name: apply presto role
+      include_role:
+        name: presto-coordinator
+      when: "'presto_coordinator' in group_names"

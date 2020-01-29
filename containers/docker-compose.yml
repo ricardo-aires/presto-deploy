@@ -1,0 +1,76 @@
+version: '3.7'
+
+services:
+  discovery:
+    build:
+      context: ./build/discovery-server
+    image: discovery-server:1.0
+    container_name: discovery
+    domainname: lab.com
+    hostname: discovery
+    volumes:
+      - type: volume
+        source: discovery-data
+        target: /data
+    ports:
+      - target: 8411
+        published: 8411
+        protocol: tcp 
+    networks:
+      - sub-net
+  presto-coordinator:
+    build:
+      context: ./build/presto-coordinator
+    image: presto-coordinator:1.0
+    container_name: presto-coord
+    domainname: lab.com
+    hostname: presto-coord
+    environment:
+      DISCOVERY_SERVER_IP: discovery
+    volumes:
+      - type: volume
+        source: presto-coord-data
+        target: /data
+    ports:
+      - target: 8080
+        published: 8080
+        protocol: tcp 
+    networks:
+      - sub-net
+  presto-worker1:
+    build:
+      context: ./build/presto-worker
+    image: presto-worker:1.0
+    container_name: presto-worker1
+    domainname: lab.com
+    hostname: presto-worker1
+    environment:
+      DISCOVERY_SERVER_IP: discovery
+    volumes:
+      - type: volume
+        source: presto-worker1-data
+        target: /data
+    networks:
+      - sub-net
+  presto-worker2:
+    image: presto-worker:1.0
+    container_name: presto-worker2
+    domainname: lab.com
+    hostname: presto-worker2
+    environment:
+      DISCOVERY_SERVER_IP: discovery
+    volumes:
+      - type: volume
+        source: presto-worker2-data
+        target: /data
+    networks:
+      - sub-net
+
+volumes:
+  discovery-data:
+  presto-coord-data:
+  presto-worker1-data:
+  presto-worker2-data:
+
+networks:
+  sub-net:

@@ -1,0 +1,13 @@
+---
+# installation of presto-coordinator
+presto_dependecies:
+  - java-1.8.0-openjdk
+presto_repo: https://repo1.maven.org/maven2/com/facebook/presto
+presto_distro_name: "presto-server-{{ presto_version }}"
+presto_server_tarball: "{{ presto_distro_name }}.tar.gz"
+presto_server_tarball_url: "{{ presto_repo }}/presto-server/{{ presto_version }}/{{ presto_server_tarball }}"
+presto_cli_jar_url: "{{ presto_repo }}/presto-cli/{{ presto_version }}/presto-cli-{{ presto_version }}-executable.jar"
+# directories for presto
+presto_home_dir: "/opt/{{ presto_distro_name }}"
+presto_conf_dir: "{{ presto_home_dir }}/etc"
+presto_data_dir: "/var/lib/data/presto"

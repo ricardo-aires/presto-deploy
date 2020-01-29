@@ -1,0 +1,26 @@
+---
+# defaults file for presto-worker
+# user presto
+presto_user:
+  username: presto
+  group: presto
+  uid: 996
+  gid: 993
+  comment: Presto
+# installation of presto
+presto_version: "0.230"
+presto_server_tarball_url_checksum: md5:915121f44aba539e684dd56e6c85ed00
+# presto settings
+## node.properties
+presto_environment: test
+## jvm.config
+presto_jvm_max_memory: 2G
+## config.properties
+presto_http_port: 8080
+presto_query_max_memory: 1GB
+presto_query_max_memory_per_node: 1GB
+presto_query_max_total_memory_per_node: 1GB
+discovery_server_ip: "{{ hostvars['discovery']['ansible_eth1']['ipv4']['address'] }}"
+discovery_server_port: 8411
+## log.properties
+presto_log_level: INFO

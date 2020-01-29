@@ -1,0 +1,8 @@
+---
+# handlers file for presto-worker
+- name: restart presto-worker service
+  service:
+    name: presto-worker
+    state: restarted
+    enabled: yes
+    daemon_reload: yes

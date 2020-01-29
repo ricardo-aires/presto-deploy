@@ -1,0 +1,205 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: presto-k8s
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: discovery-hs
+  namespace: presto-k8s
+  labels:
+    app: discovery
+spec:
+  clusterIP: None
+  ports:
+  - port: 8411
+    protocol: TCP
+    name: discovery
+  selector:
+    app: discovery
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: presto-hs
+  namespace: presto-k8s
+  labels:
+    app: presto
+spec:
+  clusterIP: None
+  ports:
+  - port: 8080
+    protocol: TCP
+    name: presto-comm
+  selector:
+    app: presto
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: presto-cs
+  namespace: presto-k8s
+  labels:
+    app: presto
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    name: presto-cli
+  selector:
+    app: presto
+    component: coordinator
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: discovery
+  namespace: presto-k8s
+spec:
+  selector:
+    matchLabels:
+      app: discovery
+  serviceName: discovery-hs
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: OrderedReady
+  template:
+    metadata:
+      labels:
+        app: discovery
+    spec:
+      containers:
+      - name: discovery
+        imagePullPolicy: IfNotPresent
+        image: "discovery-server:1.0"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "0.5"
+          limits:
+            memory: "2Gi"
+            cpu: "0.5"
+        ports:
+        - containerPort: 8411
+          name: admin
+        volumeMounts:
+        - name: datadir
+          mountPath: /data
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 1000
+  volumeClaimTemplates:
+  - metadata:
+      name: datadir
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: coordinator
+  namespace: presto-k8s
+spec:
+  selector:
+    matchLabels:
+      app: presto
+  serviceName: presto-hs
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: OrderedReady
+  template:
+    metadata:
+      labels:
+        app: presto
+        component: coordinator
+    spec:
+      containers:
+      - name: coordinator
+        imagePullPolicy: IfNotPresent
+        image: "presto-coordinator:1.0"
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "0.5"
+          limits:
+            memory: "3Gi"
+            cpu: "0.5"
+        env:
+        - name: DISCOVERY_SERVER_IP
+          value: discovery-hs
+        ports:
+        - containerPort: 8080
+          name: admin
+        volumeMounts:
+        - name: datadir
+          mountPath: /data
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 1000
+  volumeClaimTemplates:
+  - metadata:
+      name: datadir
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: worker
+  namespace: presto-k8s
+spec:
+  selector:
+    matchLabels:
+      app: presto
+  serviceName: presto-hs
+  replicas: 3
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: OrderedReady
+  template:
+    metadata:
+      labels:
+        app: presto
+        component: worker
+    spec:
+      containers:
+      - name: worker
+        imagePullPolicy: IfNotPresent
+        image: "presto-worker:1.0"
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "0.5"
+          limits:
+            memory: "3Gi"
+            cpu: "0.5"
+        env:
+        - name: DISCOVERY_SERVER_IP
+          value: discovery-hs
+        ports:
+        - containerPort: 8080
+          name: admin
+        volumeMounts:
+        - name: datadir
+          mountPath: /data
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 1000
+  volumeClaimTemplates:
+  - metadata:
+      name: datadir
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi
