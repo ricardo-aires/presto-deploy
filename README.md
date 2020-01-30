@@ -28,7 +28,15 @@ Queries are submitted from a client such as the Presto CLI to the coordinator.
 
 Presto doesn't have, at this time, HA. For these reason, and because the ultimate goal is to run it in containers we are going to deploy a slightly different architecture, using a dedicated server to run the discover service.
 
-For this we are going to use the latest [discovery-server](https://repo1.maven.org/maven2/com/facebook/airlift/discovery/discovery-server/1.30/discovery-server-1.30.tar.gz) found in the [Facebook Maven](https://repo1.maven.org/maven2/com/facebook/airlift/discovery/discovery-server)
+For this we are going to use the latest [discovery-server](https://repo1.maven.org/maven2/com/facebook/airlift/discovery/discovery-server/1.30/discovery-server-1.30.tar.gz) found in the [Facebook Maven](https://repo1.maven.org/maven2/com/facebook/airlift/discovery/discovery-server).
+
+Nonetheless we will provide separate solutions for different topologies:
+
+- standalone
+- coordinator and workers
+- discovery server, coordinator and workers
+
+> In the last two options no work can be schedule in a coordinator.
 
 ## Requirements
 
