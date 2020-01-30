@@ -1,5 +1,9 @@
 ---
-# defaults file for presto-coordinator
+# defaults file for presto
+# role of server should 
+presto_is_standalone: false
+presto_is_coordinator: true
+presto_is_discovery_internal: true
 # user presto
 presto_user:
   username: presto
@@ -21,7 +25,7 @@ presto_http_port: 8080
 presto_query_max_memory: 1GB
 presto_query_max_memory_per_node: 1GB
 presto_query_max_total_memory_per_node: 1GB
-discovery_server_ip: "{{ hostvars['discovery']['ansible_eth1']['ipv4']['address'] }}"
-discovery_server_port: 8411
+discovery_server_ip: "{{ hostvars['coordinator']['ansible_eth1']['ipv4']['address'] }}"
+discovery_server_port: 8080
 ## log.properties
 presto_log_level: INFO

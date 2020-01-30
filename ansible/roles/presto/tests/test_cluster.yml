@@ -1,0 +1,20 @@
+---
+- name: deploy presto coordinator
+  hosts: presto_coordinator
+  become: true
+
+  tasks:
+    - name: apply presto role
+      import_role:
+        name: presto
+
+- name: deploy presto workers
+  hosts: presto_workers
+  become: true
+  vars:
+    presto_is_coordinator: false
+
+  tasks:
+    - name: apply presto role
+      import_role:
+        name: presto

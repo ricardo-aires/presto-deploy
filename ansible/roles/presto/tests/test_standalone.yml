@@ -1,0 +1,11 @@
+---
+- name: deploy presto standalone
+  hosts: presto_coordinator
+  become: true
+  vars:
+    presto_is_standalone: true
+
+  tasks:
+    - name: apply presto role
+      import_role:
+        name: presto

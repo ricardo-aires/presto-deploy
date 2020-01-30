@@ -11,12 +11,19 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "discovery" do |dis|
     dis.vm.hostname = "discovery.lab.com"
-    dis.vm.network "private_network", ip: "192.168.33.30"
+    dis.vm.network "private_network", ip: "192.168.33.20"
   end
 
   config.vm.define "coordinator" do |coordinator|
     coordinator.vm.hostname = "coordinator.lab.com"
-    coordinator.vm.network "private_network", ip: "192.168.33.31"
+    coordinator.vm.network "private_network", ip: "192.168.33.30"
   end
+
+(1..2).each do |i|
+    config.vm.define "worker0#{i}" do |worker|
+        worker.vm.hostname = "worker0#{i}.lab.com"
+        worker.vm.network "private_network", ip: "192.168.33.3#{i}"
+    end
+end
 
 end

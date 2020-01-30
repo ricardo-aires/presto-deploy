@@ -1,0 +1,35 @@
+---
+- name: create external discovery server
+  hosts: discovery_server
+  become: true
+
+  tasks:
+    - name: apply discovery-server role
+      import_role:
+        name: discovery-server
+
+- name: deploy presto coordinator
+  hosts: presto_coordinator
+  become: true
+  vars:
+    presto_is_discovery_internal: false
+    discovery_server_ip: "{{ hostvars['discovery']['ansible_eth1']['ipv4']['address'] }}"
+    discovery_server_port: 8411
+
+  tasks:
+    - name: apply presto role
+      import_role:
+        name: presto
+
+- name: deploy presto workers
+  hosts: presto_workers
+  become: true
+  vars:
+    presto_is_coordinator: false
+    discovery_server_ip: "{{ hostvars['discovery']['ansible_eth1']['ipv4']['address'] }}"
+    discovery_server_port: 8411
+
+  tasks:
+    - name: apply presto role
+      import_role:
+        name: presto

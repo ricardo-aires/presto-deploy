@@ -1,0 +1,12 @@
+coordinator={{ presto_is_coordinator }}
+{% if presto_is_coordinator is sameas true %}
+node-scheduler.include-coordinator={{ presto_is_standalone }}
+{% endif %}
+http-server.http.port={{ presto_http_port }}
+query.max-memory={{ presto_query_max_memory }}
+query.max-memory-per-node={{ presto_query_max_memory_per_node }}
+query.max-total-memory-per-node={{ presto_query_max_total_memory_per_node }}
+{% if presto_is_coordinator is sameas true %}
+discovery-server.enabled={{ presto_is_discovery_internal }}
+{% endif %}
+discovery.uri=http://{{ discovery_server_ip }}:{{ discovery_server_port }}

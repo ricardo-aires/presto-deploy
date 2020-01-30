@@ -1,8 +1,0 @@
----
-# handlers file for presto-coordinator
-- name: restart presto-coordinator service
-  service:
-    name: presto-coordinator
-    state: restarted
-    enabled: yes
-    daemon_reload: yes

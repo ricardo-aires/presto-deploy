@@ -1,5 +1,5 @@
 ---
-# tasks file for presto-worker
+# tasks file for presto
 - name: ensure dependencies are installed
   package:
     name: "{{ presto_dependecies }}"
@@ -7,7 +7,7 @@
 
 - name: ensure group presto exists
   group:
-    name: presto
+    name: "{{ presto_user.username }}"
     gid: "{{ presto_user.gid }}"
     state: present
 
@@ -47,7 +47,7 @@
     owner: "{{ presto_user.username }}"
     group: "{{ presto_user.group }}"
     remote_src: yes
-  notify: restart presto-worker service
+  notify: restart presto service
 
 - name: fix permissions after extract
   file:
@@ -64,7 +64,7 @@
     group: "{{ presto_user.group }}"
     mode: '0644'
     directory_mode: '0755'
-  notify: restart presto-worker service
+  notify: restart presto service
 
 - name: ensure setup files are in-place
   template:
@@ -78,23 +78,40 @@
     - jvm.config
     - config.properties
     - log.properties
-  notify: restart presto-worker service
+  notify: restart presto service
 
-- name: setup systemctl presto-worker service
+- name: setup systemctl presto service
   template:
-    src: presto-worker.service.j2
-    dest: /etc/systemd/system/presto-worker.service
+    src: presto.service.j2
+    dest: /etc/systemd/system/presto.service
     owner: root
     group: root
     mode: '0644'
-  notify: restart presto-worker service
+  notify: restart presto service
 
 - name: Force all notified handlers to run at this point
   meta: flush_handlers
 
-- name: ensure presto service-worker is enabled and started
+- name: ensure presto service is enabled and started
   service:
-    name: presto-worker
+    name: presto
     state: started
     enabled: yes
     daemon_reload: yes
+
+- name: get presto cli
+  get_url:
+    url: "{{ presto_cli_jar_url }}"
+    dest: "{{ presto_home_dir }}/bin/presto-cli"
+    owner: presto
+    group: presto
+    mode: '0555'
+    checksum: "{{ presto_cli_jar_checksum }}"
+
+- name: Create a symbolic link to presto cli
+  file:
+    src: "{{ presto_home_dir }}/bin/presto-cli"
+    dest: /usr/local/sbin/presto-cli
+    owner: presto
+    group: presto
+    state: link

@@ -1,4 +1,0 @@
-[discovery_server]
-discovery ansible_host=192.168.33.30 ansible_user=vagrant ansible_ssh_private_key_file=./.vagrant/machines/discovery/virtualbox/private_key
-[presto_coordinator]
-coordinator ansible_host=192.168.33.31 ansible_user=vagrant ansible_ssh_private_key_file=./.vagrant/machines/coordinator/virtualbox/private_key
