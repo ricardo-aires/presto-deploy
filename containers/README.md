@@ -1,91 +1,55 @@
 # Containerised Presto
 
-[Dockerfiles](https://docs.docker.com/engine/reference/builder/) to build three Docker image with:
+This project provides a way to run [Presto](https://prestodb.io) in containers.
 
-- Discovery Server
-- Presto Coordinator
-- Presto Worker
+> The solutions provided were designed for Proof of Concepts. Hence, are not to be treated as production ready, especially because of the lack of Security settings.
 
-This will allow us to run [Presto](http://prestodb.io) in containers.
+There are three different deployments:
 
-> This was done in a Proof of Concept project, were it wasn't possible to use the [ZooKeeper Docker Official Image](https://hub.docker.com/_/zookeeper).
+- Standalone - only one node to act as discovery, coordinator and worker.
+- Cluster - one node to act as discovery and coordinator other nodes as workers.
+- Cluster with External Discovery Server - one node to act as discover, one other to be the coordinator and other nodes to act as workers.
 
-## Getting Started
+> The last one requires a Discovery Server to be in-place a [Dockerfiles](https://docs.docker.com/engine/reference/builder/) to build the required image will be also provided.
 
-In order to build the image just clone the repo to your machine and run [docker build](https://docs.docker.com/engine/reference/commandline/build/) inside each of sub-directories of [build](./build/) where the [Dockerfile](./build/Dockerfile) and [docker-entrypoint.sh](./build/docker-entrypoint.sh) are. Example:
+## Dockerfiles
+
+In that case we will provide two [Dockerfiles](https://docs.docker.com/engine/reference/builder/) to build the required images:
+
+- [Discovery Server](./docker/build/discovery-server/README.md)
+- [Presto](./docker/build/presto/README.md)
+
+## Docker Compose
+
+Two [docker-compose files](https://docs.docker.com/compose/compose-file/) will be provided to spin:
+
+- [Presto Cluster](./docker/docker-compose-presto-cluster.yml) - 1 coordinator and 2 workers
+- [Presto Cluster with external Discovery Server](./docker/docker-compose-presto-external-discovery.yml) - 1 discovery server, 1 coordinator and 2 workers
+
+We can use them to build the required images also, from this directory just run:
 
 ```bash
-docker build -t discovery-server:1.0 ./build/discovery-server
+docker-compose -f ./docker/docker-compose-presto-cluster.yml build
+docker-compose -f ./docker/docker-compose-presto-external-discovery.yml build
 ```
 
-This can also be done using the [docker-compose file](https://docs.docker.com/compose/compose-file/) found [here](./docker-compose.yml), just run
+To spin up either one, run:
 
 ```bash
-docker-compose build
+docker-compose -f ./docker/docker-compose-presto-cluster.yml up
+docker-compose -f ./docker/docker-compose-presto-external-discovery.yml up
 ```
 
-### Prerequisities
+## Kubernetes
 
-In order to build the image and run this container you'll need docker installed.
+After creating the images we will be able to run it in [Kubernetes](https://kubernetes.io) using two deployments:
 
-This was tested using [Docker Desktop](https://www.docker.com/products/docker-desktop) for MacOS version 2.1.0.5.
+- [Presto Cluster](./k8s/k8s-presto-deploy.yml) - 1 coordinator and 2 workers
+- [Presto Cluster with external Discovery Server](./k8s/k8s-presto-external-discovery.yml) - 1 discovery server, 1 coordinator and 2 workers
 
-### Base Image
-
-The base image used in this case was the [openjdk:8 Docker Official Image](https://hub.docker.com/_/openjdk). When running inside a organization we should use a base image with:
-
-- java
-- python 2.4+
-- bash
-- wget
-
-### Usage
-
-> ALWAYS give the containers a `hostname` or persistence will not work.
-
-The proper way to run is to use the [docker-compose file](https://docs.docker.com/compose/compose-file/) found [here](./docker-compose.yml) to spin a fully functional cluster with:
-
-- 1x Discovery Server
-- 1x Presto Coordinator
-- 2x Presto Workers
-
-It will also build the required images.
-
-> This solution was not intentend to run in standalone, and it's not ready for it.
-
-#### Volumes
-
-The only volume exposed in all images is the one for the Discovery Server and Presto Data directoy, at `/data`.
-
-#### Ports
-
-The ports expose are as follow:
-
-- `8441` - for the discovery server
-- `8080` - for both Presto Coordinator and Worker
-
-#### Environment Variables
-
-For the discovery server image there is only two variables:
-
-- `DISCOVERY_HEAP_SIZE`: heap size to allocate to the service, defaults to `1G`.
-- `DISCOVERY_ENV`: name of the environment, defaults to `docker`.
-For the Presto, both Coordinator and worker, the only required variable to be in-place every time is:
-
-- `DISCOVERY_SERVER_IP` - which should point to the container runnig the discovery server.
-
-Other variables to ease the settings of Presto:
-
-- `PRESTO_HEAP_SIZE`: heap size to allocate to the service, defaults to `2G`.
-- `PRESTO_ENV`: name of the environment, defaults to `docker`.
-- `PRESTO_QUERY_MAX_MEMORY`: the maximum amount of distributed memory that a query may use, defaults to`1GB`.
-- `PRESTO_QUERY_MAX_MEMORY_PER_NODE`: the maximum amount of user memory that a query may use on any one machine, defaults to `1GB`.
-- `PRESTO_QUERY_MAX_TOTAL_MEMORY_PER_NODE`: the maximum amount of user and system memory that a query may use on any one machine, defaults to `1GB`.
-
-#### Run in Kubernetes
-
-The images may be used in [Kubernetes](https://kubernetes.io) using the [k8s-zookeeper.yml](./k8s-presto-deploy.yml) file:
+To spin up either one, run:
 
 ```bash
-kubectl apply -f ./k8s-presto-deploy.yml
+kubectl apply -f ./k8s/k8s-presto-deploy.yml
+kubectl apply -f ./k8s/k8s-presto-external-discovery.yml
 ```

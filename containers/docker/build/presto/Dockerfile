@@ -5,6 +5,10 @@ ARG VERSION=0.230
 ARG DISTRO_NAME=presto-server-$VERSION
 
 ENV PRESTO_ENV=docker \
+    PRESTO_ROLE=standalone \
+    IS_DISCOVERY_INTERNAL=true \
+    DISCOVERY_SERVER_IP=localhost \
+    DISCOVERY_SERVER_PORT=8080 \
     PRESTO_HEAP_SIZE=2G \
     PRESTO_DATA_DIR=/data \
     PRESTO_HOME=/$DISTRO_NAME \
@@ -21,15 +25,21 @@ RUN set -eux && \
     wget "$MIRROR/presto-server/$VERSION/$DISTRO_NAME.tar.gz" -O "$DISTRO_NAME.tar.gz" && \
 	tar xvzf "$DISTRO_NAME.tar.gz" && \
     rm -rf  "$DISTRO_NAME.tar.gz" && \
+    wget "$MIRROR/presto-cli/$VERSION/presto-cli-$VERSION-executable.jar" -O "$PRESTO_HOME/bin/presto-cli" && \
+    chmod u+x "$PRESTO_HOME/bin/presto-cli" && \
     mkdir -p $PRESTO_DATA_DIR $PRESTO_CFG_DIR && \
-    chown -R presto:presto "/$DISTRO_NAME" "$PRESTO_DATA_DIR" "$PRESTO_CFG_DIR"
+    chown -R presto:presto "$PRESTO_HOME" "$PRESTO_DATA_DIR" "$PRESTO_CFG_DIR"
 
 WORKDIR $PRESTO_HOME
+
 VOLUME ["$PRESTO_DATA_DIR"]
+
 EXPOSE 8080
+
 USER presto
 
 COPY --chown=presto:presto catalog/ $PRESTO_HOME/default/catalog
 COPY --chown=presto:presto docker-entrypoint.sh /
+
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["launcher", "run"]

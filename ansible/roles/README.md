@@ -17,4 +17,4 @@ There are three different deployments:
 Two independent roles were created:
 
 - [discovery-server](discovery-server/README.md) - Role to deploy the discovery service in a separate host.
-- [presto-coordinator](presto/README.md) - Role to deploy the Presto 
+- [presto-coordinator](presto/README.md) - Role to deploy the Presto.

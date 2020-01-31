@@ -1,0 +1,58 @@
+version: '3.7'
+
+services:
+  presto-coordinator:
+    build:
+      context: ./build/presto
+    image: presto:1.0
+    container_name: presto-coord
+    domainname: lab.com
+    hostname: presto-coord
+    environment:
+      PRESTO_ROLE: coordinator
+    volumes:
+      - type: volume
+        source: presto-coord-data
+        target: /data
+    ports:
+      - target: 8080
+        published: 8080
+        protocol: tcp 
+    networks:
+      - sub-net
+  presto-worker1:
+    image: presto:1.0
+    container_name: presto-worker1
+    domainname: lab.com
+    hostname: presto-worker1
+    environment:
+      PRESTO_ROLE: worker
+      DISCOVERY_SERVER_IP: presto-coord
+    volumes:
+      - type: volume
+        source: presto-worker1-data
+        target: /data
+    networks:
+      - sub-net
+  presto-worker2:
+    image: presto:1.0
+    container_name: presto-worker2
+    domainname: lab.com
+    hostname: presto-worker2
+    environment:
+      PRESTO_ROLE: worker
+      DISCOVERY_SERVER_IP: presto-coord
+    volumes:
+      - type: volume
+        source: presto-worker2-data
+        target: /data
+    networks:
+      - sub-net
+
+volumes:
+  presto-coord-data:
+  presto-worker1-data:
+  presto-worker2-data:
+
+networks:
+  sub-net:

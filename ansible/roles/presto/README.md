@@ -10,7 +10,7 @@ There are three different deployments:
 - Cluster - one node to act as discovery and coordinator other nodes as workers.
 - Cluster with External Discovery Server - one node to act as discover, one other to be the coordinator and other nodes to act as workers.
 
-> The last one needs a Discovery Server must be in-place, under [tests/test_cluster_external_discovery.yml](./tests/test_cluster_external_discovery.yml) we call  the [Discovery Server Role](../discovery-server/README.md).
+> The last one needs a Discovery Server to be in-place, under [tests/test_cluster_external_discovery.yml](./tests/test_cluster_external_discovery.yml) we call  the [Discovery Server Role](../discovery-server/README.md).
 
 ## Requirements
 

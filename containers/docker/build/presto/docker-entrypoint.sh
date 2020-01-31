@@ -1,24 +1,36 @@
 #!/bin/bash
 set -e
 
-if [[ -z ${DISCOVERY_SERVER_IP} ]]; then
-    echo "DISCOVERY_SERVER_IP is unset or set to the empty string"
+if [ ${DISCOVERY_SERVER_IP} == 'localhost' ] && [ ${PRESTO_ROLE} == 'worker' ]; then
+    echo "If the role is worker, DISCOVERY_SERVER_IP must be set to other than localhost!"
     exit
 fi
 
-if [[ ! -f "$PRESTO_CFG_DIR/config.properties" ]]; then
+if [ ! -f "$PRESTO_CFG_DIR/config.properties" ]; then
     CONFIG_PROPERTIES="$PRESTO_CFG_DIR/config.properties"
     {
-        echo "coordinator=false"
+        if [ ${PRESTO_ROLE} != 'worker' ]; then
+            echo "coordinator=true"
+        else
+            echo "coordinator=false"
+        fi
+        if [ ${PRESTO_ROLE} == 'standalone' ]; then
+            echo "node-scheduler.include-coordinator=true"
+        else
+            echo "node-scheduler.include-coordinator=false"
+        fi
         echo "http-server.http.port=8080"
         echo "query.max-memory=$PRESTO_QUERY_MAX_MEMORY"
         echo "query.max-memory-per-node=$PRESTO_QUERY_MAX_MEMORY_PER_NODE"
         echo "query.max-total-memory-per-node=$PRESTO_QUERY_MAX_TOTAL_MEMORY_PER_NODE"
-        echo "discovery.uri=http://$DISCOVERY_SERVER_IP:${DISCOVERY_SERVER_PORT:-8411}"
+        if [ ${PRESTO_ROLE} != 'worker' ]; then
+            echo "discovery-server.enabled=$IS_DISCOVERY_INTERNAL"
+        fi
+        echo "discovery.uri=http://$DISCOVERY_SERVER_IP:$DISCOVERY_SERVER_PORT"
     } >> "$CONFIG_PROPERTIES"
 fi
 
-if [[ ! -f "$PRESTO_CFG_DIR/jvm.config" ]]; then
+if [ ! -f "$PRESTO_CFG_DIR/jvm.config" ]; then
     JVM_CONFIG="$PRESTO_CFG_DIR/jvm.config"
     {
         echo "-server"
@@ -36,7 +48,7 @@ if [[ ! -f "$PRESTO_CFG_DIR/jvm.config" ]]; then
     } >> "$JVM_CONFIG"
 fi
 
-if [[ ! -f "$PRESTO_CFG_DIR/node.properties" ]]; then
+if [ ! -f "$PRESTO_CFG_DIR/node.properties" ]; then
     NODE_PROPERTIES="$PRESTO_CFG_DIR/node.properties"
     {
         echo "node.environment=$PRESTO_ENV"
@@ -45,7 +57,7 @@ if [[ ! -f "$PRESTO_CFG_DIR/node.properties" ]]; then
     } >> "$NODE_PROPERTIES"
 fi
 
-if [[ ! -d $PRESTO_CATALOG_DIR ]]; then
+if [ ! -d $PRESTO_CATALOG_DIR ]; then
     ln -s $PRESTO_HOME/default/catalog $PRESTO_HOME/etc/
 fi
 
