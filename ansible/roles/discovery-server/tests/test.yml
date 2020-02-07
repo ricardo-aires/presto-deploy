@@ -1,9 +1,0 @@
----
-- name: deploy discover server
-  hosts: discovery_server
-  become: true
-
-  tasks:
-    - name: apply discovery-server role
-      import_role:
-        name: discovery-server

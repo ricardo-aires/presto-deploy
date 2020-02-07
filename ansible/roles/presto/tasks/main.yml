@@ -7,7 +7,7 @@
 
 - name: ensure group presto exists
   group:
-    name: "{{ presto_user.username }}"
+    name: "{{ presto_user.group }}"
     gid: "{{ presto_user.gid }}"
     state: present
 
@@ -103,8 +103,8 @@
   get_url:
     url: "{{ presto_cli_jar_url }}"
     dest: "{{ presto_home_dir }}/bin/presto-cli"
-    owner: presto
-    group: presto
+    owner: "{{ presto_user.username }}"
+    group: "{{ presto_user.group }}"
     mode: '0555'
     checksum: "{{ presto_cli_jar_checksum }}"
 
@@ -112,6 +112,6 @@
   file:
     src: "{{ presto_home_dir }}/bin/presto-cli"
     dest: /usr/local/sbin/presto-cli
-    owner: presto
-    group: presto
+    owner: "{{ presto_user.username }}"
+    group: "{{ presto_user.group }}"
     state: link

@@ -1,8 +1,0 @@
----
-# handlers file for discovery-server
-- name: restart discovery-server service
-  service:
-    name: discovery-server
-    state: restarted
-    enabled: yes
-    daemon_reload: yes

@@ -8,8 +8,8 @@ Presto allows querying data where it lives, including Hive, Cassandra, relationa
 
 In this repository we will provide some examples of deploying a Presto Cluster:
 
-- [Ansible](./ansible/roles/README.MD)
-- [Docker/Kubernetes](./containers/README.MD)
+- [Ansible](./ansible/roles/presto/README.md)
+- [Docker/Kubernetes](./containers/README.md)
 
 The distribution in use will be the one from the [Presto Foundation](https://github.com/prestodb/presto).
 
@@ -21,16 +21,16 @@ Presto is a distributed system that runs on one or more machines to form a clust
 
 An installation will, tipically, include:
 
-- one Presto Coordinator - Machine to which users submit their queries. The Coordinator is responsible for parsing, planning, and scheduling query execution across the Presto Workers. Usually runs the discovery service in embedded mode.
+- one Presto Coordinator - Machine to which users submit their queries. The Coordinator is responsible for parsing, planning, and scheduling query execution across the Presto Workers. Usually runs the Discovery Server in embedded mode.
 - any number of Presto Workers - Adding more Presto Workers allows for more parallelism and faster query processing.
 
 Queries are submitted from a client such as the Presto CLI to the coordinator.
 
-Presto doesn't have, at this time, HA. For these reason, and because the ultimate goal is to run it in containers we are going to deploy a slightly different architecture, using a dedicated server to run the discover service.
+Presto doesn't have, at this time, HA. For these reason, and because the ultimate goal is to run it in containers we are going to deploy a slightly different architecture, using a dedicated server to run the Discovery Server.
 
-For this we are going to use the latest [discovery-server](https://repo1.maven.org/maven2/com/facebook/airlift/discovery/discovery-server/1.30/discovery-server-1.30.tar.gz) found in the [Facebook Maven](https://repo1.maven.org/maven2/com/facebook/airlift/discovery/discovery-server).
+To deploy the Discovery Server we are going to use one of the methods found [here](http://github.com/ricardo-aires/discovery-server-deploy).
 
-Nonetheless we will provide separate solutions for different topologies:
+We will provide separate solutions for different topologies:
 
 - standalone
 - coordinator and workers
@@ -85,7 +85,7 @@ The basic Presto Server Configuration properties are:
 - `query.max-memory` - maximum amount of distributed memory that a query may use.
 - `query.max-memory-per-node` - maximum amount of user memory that a query may use on any one machine.
 - `query.max-total-memory-per-node` - maximum amount of user and system memory that a query may use on any one machine, where system memory is the memory used during execution by readers, writers, and network buffers, etc.
-- `discovery-server.enabled` - Discovery service to find all the nodes in the cluster. Every Presto instance will register itself with the Discovery service on startup. In order to simplify deployment and avoid running an additional service, the Presto coordinator can run an embedded version of the Discovery service. It shares the HTTP server with Presto and thus uses the same port.
+- `discovery-server.enabled` - Discovery server to find all the nodes in the cluster. Every Presto instance will register itself with the Discovery server on startup. In order to simplify deployment and avoid running an additional service, the Presto coordinator can run an embedded version of the Discovery server. It shares the HTTP server with Presto and thus uses the same port.
 - `discovery.uri` -  The URI to the Discovery server. When running the embedded version of Discovery in the Presto coordinator, this should be the URI of the Presto coordinator. This URI must not end in a slash.
 
 There are other additional optional properties to setup features such as:
@@ -181,7 +181,7 @@ The installation directory contains a couple of launcher scripts, mainly the `bi
 - `bin/launcher kill` - forcefully stop Presto.
 - `bin/launcher status` - obtain the status of Presto.
 
-## PRESTO SERVER LOGS
+## Presto Server Logs
 
 When running Presto as a background daemon process, logs and other output to Presto are written in `var/log`. This will be located within the installation directly unless you specified a different location in the `etc/node.properties` file.
 

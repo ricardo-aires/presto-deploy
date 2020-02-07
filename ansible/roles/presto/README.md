@@ -1,4 +1,4 @@
-# presto-coordinator
+# presto
 
 Role that setup  [Presto](https://prestodb.io).
 
@@ -93,3 +93,5 @@ The [Vagrantfile](./tests/Vagrantfile) will create all necessary VMs for all sce
 - [Standalone](./tests/test_standalone.yml) - only one node to act as discovery, coordinator and worker.
 - [Cluster](./tests/test_cluster.yml) - one node to act as discovery and coordinator and two nodes as workers.
 - [Cluster with External Discovery Server](./tests/test_cluster_external_discovery.yml) - one node to act as discover, one other to be the coordinator and two nodes to act as workers.
+
+> Make sure to make the [Discovery Server Role](https://github.com/ricardo-aires/discovery-server-deploy/tree/master/ansible/roles/discovery-server) available in order to run it in the Discovery Server VM.

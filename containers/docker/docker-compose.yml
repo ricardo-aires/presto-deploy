@@ -2,8 +2,6 @@ version: '3.7'
 
 services:
   discovery:
-    build:
-      context: ./build/discovery-server
     image: discovery-server:1.0
     container_name: discovery
     domainname: lab.com
@@ -20,7 +18,7 @@ services:
       - sub-net
   presto-coordinator:
     build:
-      context: ./build/presto
+      context: ./build/
     image: presto:1.0
     container_name: presto-coord
     domainname: lab.com

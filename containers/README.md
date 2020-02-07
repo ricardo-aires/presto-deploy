@@ -10,46 +10,30 @@ There are three different deployments:
 - Cluster - one node to act as discovery and coordinator other nodes as workers.
 - Cluster with External Discovery Server - one node to act as discover, one other to be the coordinator and other nodes to act as workers.
 
-> The last one requires a Discovery Server to be in-place a [Dockerfiles](https://docs.docker.com/engine/reference/builder/) to build the required image will be also provided.
+> The last one requires a Discovery Server to be in-place a [Dockerfiles](https://docs.docker.com/engine/reference/builder/) to build the required image is provided in this [repo](https://github.com/ricardo-aires/discovery-server-deploy/blob/master/containers/docker/README.md).
 
 ## Dockerfiles
 
-In that case we will provide two [Dockerfiles](https://docs.docker.com/engine/reference/builder/) to build the required images:
-
-- [Discovery Server](./docker/build/discovery-server/README.md)
-- [Presto](./docker/build/presto/README.md)
+In that case we will provide a [Dockerfile](https://docs.docker.com/engine/reference/builder/) to build the Presto image [here](./docker/README.md)
 
 ## Docker Compose
 
-Two [docker-compose files](https://docs.docker.com/compose/compose-file/) will be provided to spin:
+A [docker-compose file](https://docs.docker.com/compose/compose-file/) to show case the deployment of a Presto Cluster with an external Discovery Server is available [here](./docker/docker-compose-presto-external-discovery.yml).
 
-- [Presto Cluster](./docker/docker-compose-presto-cluster.yml) - 1 coordinator and 2 workers
-- [Presto Cluster with external Discovery Server](./docker/docker-compose-presto-external-discovery.yml) - 1 discovery server, 1 coordinator and 2 workers
-
-We can use them to build the required images also, from this directory just run:
+We can use it to build the Presto images also, from switch to `./docker/` directory and run:
 
 ```bash
-docker-compose -f ./docker/docker-compose-presto-cluster.yml build
-docker-compose -f ./docker/docker-compose-presto-external-discovery.yml build
+docker-compose build
 ```
 
-To spin up either one, run:
+To spin up, run:
 
 ```bash
-docker-compose -f ./docker/docker-compose-presto-cluster.yml up
-docker-compose -f ./docker/docker-compose-presto-external-discovery.yml up
+docker-compose up
 ```
 
 ## Kubernetes
 
-After creating the images we will be able to run it in [Kubernetes](https://kubernetes.io) using two deployments:
+After creating the images we will be able to run it in [Kubernetes](https://kubernetes.io).
 
-- [Presto Cluster](./k8s/k8s-presto-deploy.yml) - 1 coordinator and 2 workers
-- [Presto Cluster with external Discovery Server](./k8s/k8s-presto-external-discovery.yml) - 1 discovery server, 1 coordinator and 2 workers
-
-To spin up either one, run:
-
-```bash
-kubectl apply -f ./k8s/k8s-presto-deploy.yml
-kubectl apply -f ./k8s/k8s-presto-external-discovery.yml
-```
+We show an example to setup a Presto Cluster with an external Discovery Server [here](./k8s/README.md)

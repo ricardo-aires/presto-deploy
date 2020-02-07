@@ -10,7 +10,7 @@ The aim is to provide an image that can support three different deployments:
 - Cluster - one node to act as discovery and coordinator other nodes as workers.
 - Cluster with External Discovery Server - one node to act as discover, one other to be the coordinator and other nodes to act as workers.
 
-> The last one requires a Discovery Server to be in-place a [Dockerfiles](https://docs.docker.com/engine/reference/builder/), check [here](../discovery-server/README.md) to build the required image.
+> The last one requires a Discovery Server to be in-place a [Dockerfiles](https://docs.docker.com/engine/reference/builder/) to build the required image is provided in this [repo](https://github.com/ricardo-aires/discovery-server-deploy/blob/master/containers/docker/README.md).
 
 ## Getting Started
 
