@@ -1,0 +1,73 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: presto
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: presto-hs
+  namespace: presto
+  labels:
+    app: presto
+spec:
+  clusterIP: None
+  ports:
+  - port: 8080
+    protocol: TCP
+    name: presto-comm
+  selector:
+    app: presto
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: presto
+  namespace: presto
+spec:
+  selector:
+    matchLabels:
+      app: presto
+  serviceName: presto-hs
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: OrderedReady
+  template:
+    metadata:
+      labels:
+        app: presto
+        component: coordinator
+    spec:
+      containers:
+      - name: presto
+        imagePullPolicy: IfNotPresent
+        image: "marionete/presto:1.0"
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "0.5"
+          limits:
+            memory: "3Gi"
+            cpu: "0.5"
+        env:
+        - name: PRESTO_K8S
+          value: "true"
+        ports:
+        - containerPort: 8080
+          name: admin
+        volumeMounts:
+        - name: datadir
+          mountPath: /data
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 1000
+  volumeClaimTemplates:
+  - metadata:
+      name: datadir
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi

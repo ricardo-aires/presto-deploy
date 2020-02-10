@@ -1,6 +1,20 @@
 #!/bin/bash
 set -e
 
+if [ ${PRESTO_K8S} == 'true' ]; then
+    PRESTO_ID=${HOSTNAME##*-}
+    PRESTO_PREFIX=${HOSTNAME::-1}
+    PRESTO_DOMAIN=$(hostname -d)
+    if [ ${PRESTO_ID} -eq 0 ]; then
+        PRESTO_ROLE=coordinator
+    else
+        PRESTO_ROLE=worker
+    fi
+    if [ ${IS_DISCOVERY_INTERNAL} == 'true' ]; then
+        DISCOVERY_SERVER_IP=${PRESTO_PREFIX}0.${PRESTO_DOMAIN}
+    fi
+fi
+
 if [ ${DISCOVERY_SERVER_IP} == 'localhost' ] && [ ${PRESTO_ROLE} == 'worker' ]; then
     echo "If the role is worker, DISCOVERY_SERVER_IP must be set to other than localhost!"
     exit

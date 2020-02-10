@@ -2,9 +2,11 @@
 
 With the Presto image created [here](../docker/README.md) we may spin a Presto Cluster with one coordinator and several workers.
 
-In this case we are going to show a way to spin with an external Discovery also. We can use [this](https://github.com/ricardo-aires/discovery-server-deploy/tree/master/containers/docker) to build a Discovery Server image.
+In [this case](#External-Discovery-Server-and-Coordinator) we are going to show a way to spin with an external Discovery also. We can use [this](https://github.com/ricardo-aires/discovery-server-deploy/tree/master/containers/docker) to build a Discovery Server image.
 
-## Getting started
+We will also [show](#One-StatefulSet) how to run all-in-one [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/).
+
+## External Discovery Server and Coordinator
 
 After building the images just run, from this directory:
 
@@ -15,15 +17,13 @@ kubectl apply -f ./k8s-presto-deploy.yml
 It will create:
 
 - A [namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/) for our test
-- Two [headless service](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services) 
+- Two [headless service](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services)
   - one to expose the server port of the Discovery Server in the cluster
   - one to expose the server port of the Prestos, coordinators and workers, in the cluster
 - Three [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)
   - one for the Discovery Server
   - one for the Presto Coordinator
   - one for multiple Presto Workers
-
-## Considerations
 
 ### Variables
 
@@ -50,3 +50,21 @@ Other variables to ease the settings of Presto:
 ### Scale
 
 The only `StatefulSet` able to scale is the `worker`.
+
+## One StatefulSet
+
+In order to run only one [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/) we can:
+
+```bash
+kubectl apply -f ./k8s-presto-deploy.yml
+```
+
+It will create:
+
+- A [namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/) for our test
+- one [headless service](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services) to expose the server port of Prestos in the cluster
+- one [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/) of Presto
+
+> The first replica will always act as a coordinator only!
+
+For this case we don't need to specify any variables other than `PRESTO_K8S`, which should be set to `true`.
